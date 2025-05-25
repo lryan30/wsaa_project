@@ -47,7 +47,6 @@ Hosted at: https://louiser.pythonanywhere.com/
 *Hosting the application on PythonAnywhere.com:*
 
 
--   visit https://louiser.pythonanywhere.com/
 -   upload project files
 -   create database via MySQL console on PythonAnywhere
 -   set up virtual environment and install dependencies there
