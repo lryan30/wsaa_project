@@ -66,7 +66,7 @@ Hosted at: https://louiser.pythonanywhere.com/
 
 ### **REFERENCES:**
 
--   [PythonAnywhere Guide] https://github.com/andrewbeattycourseware/deploytopythonanywhere
+-   [PythonAnywhere/Project Guide] https://github.com/andrewbeattycourseware/deploytopythonanywhere
 -   [Flask Documentation] https://flask.palletsprojects.com/en/latest/
 -   [MySQL-Connector Documentation] https://dev.mysql.com/doc/connector-python/en/connector-python-examples.html
 -   [Ajax-Intro W3Schools] https://www.w3schools.com/xml/ajax_intro.asp
