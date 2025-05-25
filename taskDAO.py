@@ -15,7 +15,7 @@ class TasksDAO:
             password=self.password,
             database=self.database
         )
-        self.cursor = self.connection.cursor()
+        self.cursor = self.connection.cursor(dictionary=True)
         return self.cursor
 
     def closeAll(self):
@@ -24,26 +24,28 @@ class TasksDAO:
 
     def getAll(self):
         cursor = self.getcursor()
-        cursor.execute("SELECT * FROM Tasks ORDER BY due_date;")
+        cursor.execute("SELECT * FROM tasks ORDER BY due_date;")
         results = cursor.fetchall()
-        tasks = [self.convertToDictionary(row) for row in results]
         self.closeAll()
-        return tasks
+        for task in results:
+            task['done'] = bool(task['done'])
+        return results
 
     def findByID(self, id):
         cursor = self.getcursor()
-        cursor.execute("SELECT * FROM Tasks WHERE id = %s;", (id,))
+        cursor.execute("SELECT * FROM tasks WHERE id = %s;", (id,))
         result = cursor.fetchone()
         self.closeAll()
-        return self.convertToDictionary(result) if result else None
+        if result:
+            result['done'] = bool(result['done'])
+        return result
 
     def create(self, task):
         cursor = self.getcursor()
         sql = """
-            INSERT INTO Tasks (title, description, due_date, done)
+            INSERT INTO tasks (title, description, due_date, done)
             VALUES (%s, %s, %s, %s);
         """
-        # Convert boolean done to int 0/1 for DB
         done_value = 1 if task.get('done', False) else 0
         values = (
             task.get('title'),
@@ -60,7 +62,7 @@ class TasksDAO:
     def update(self, id, task):
         cursor = self.getcursor()
         sql = """
-            UPDATE Tasks
+            UPDATE tasks
             SET title=%s, description=%s, due_date=%s, done=%s
             WHERE id=%s;
         """
@@ -78,15 +80,8 @@ class TasksDAO:
 
     def delete(self, id):
         cursor = self.getcursor()
-        cursor.execute("DELETE FROM Tasks WHERE id=%s;", (id,))
+        cursor.execute("DELETE FROM tasks WHERE id=%s;", (id,))
         self.connection.commit()
         self.closeAll()
-
-    def convertToDictionary(self, row):
-        keys = ['id', 'title', 'description', 'done', 'due_date', 'created_at', 'category_id', 'project_id', 'assigned_user_id']
-        task_dict = {keys[i]: row[i] for i in range(len(keys))}
-        
-        task_dict['done'] = bool(task_dict['done'])
-        return task_dict
 
 tasksDAO = TasksDAO()

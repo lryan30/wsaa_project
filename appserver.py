@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, abort
 from taskDAO import tasksDAO
 
+
 app = Flask(__name__)
 
 @app.route('/')
