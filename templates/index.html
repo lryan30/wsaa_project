@@ -2,9 +2,26 @@
 <head>
     <title>Task Manager</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">
     <style>
-        .hidden { display: none; }
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        button {
+            background-color: #984caf;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #ec21ca;
+        }
         table {
             border-collapse: collapse;
             width: 100%;
@@ -27,7 +44,6 @@
             padding: 4px 8px;
             font-size: 0.8em;
             border-radius: 4px;
-            cursor: pointer;
             margin-right: 5px;
         }
         #message {
@@ -46,8 +62,9 @@
 
 <div id="home">
     <h1>Task Manager</h1>
-    <button onclick="showView('tasks'); loadTasks();">View Tasks</button>
-    <button onclick="showCreateForm();">Create New Task</button>
+    <button onclick="showView('search');">View Task by ID</button>
+    <button onclick="showView('tasks'); loadTasks();">Task Log</button>
+    <button onclick="showCreateForm();">Add New Task</button>
 </div>
 
 <div id="tasks" class="hidden">
@@ -80,11 +97,20 @@
     <div id="error"></div>
 </div>
 
+<div id="search" class="hidden">
+    <h1>Search Task by ID</h1>
+    <button onclick="showView('home');">Home</button><br><br>
+    <label for="searchId">Enter Task ID:</label>
+    <input type="number" id="searchId" />
+    <button onclick="searchById();">Search</button>
+    <div id="searchResult"></div>
+</div>
+
 <script>
 function showView(viewId) {
-    $('#home, #tasks, #create_edit').addClass('hidden');
+    $('#home, #tasks, #create_edit, #search').addClass('hidden');
     $('#' + viewId).removeClass('hidden');
-    $('#message, #error').text('');
+    $('#message, #error, #searchResult').text('');
 }
 
 function loadTasks() {
@@ -101,12 +127,13 @@ function loadTasks() {
             let html = `<table>
                 <thead>
                     <tr>
-                        <th>Title</th><th>Description</th><th>Due Date</th><th>Done</th><th>Actions</th>
+                        <th>ID</th><th>Title</th><th>Description</th><th>Due Date</th><th>Done</th><th>Actions</th>
                     </tr>
                 </thead><tbody>`;
 
             tasks.forEach(task => {
                 html += `<tr>
+                    <td>${task.id}</td>
                     <td>${task.title}</td>
                     <td>${task.description}</td>
                     <td>${task.due_date || ''}</td>
@@ -189,7 +216,6 @@ function editTask(id) {
             $('#description').val(task.description);
             $('#due_date').val(task.due_date);
             $('#done').prop('checked', task.done);
-            $('#message, #error').text('');
         },
         error: function() {
             alert('Failed to load task for editing.');
@@ -208,6 +234,44 @@ function deleteTask(id) {
         },
         error: function() {
             alert('Failed to delete task.');
+        }
+    });
+}
+
+function searchById() {
+    const id = $('#searchId').val();
+    if (!id) {
+        $('#searchResult').html('<p>Please enter a Task ID.</p>');
+        return;
+    }
+
+    $.ajax({
+        url: '/tasks/' + id,
+        method: 'GET',
+        dataType: 'json',
+        success: function(task) {
+            if (!task || task.error) {
+                $('#searchResult').html('<p>Task not found.</p>');
+                return;
+            }
+
+            let html = `<table>
+                <thead>
+                    <tr><th>ID</th><th>Title</th><th>Description</th><th>Due Date</th><th>Done</th></tr>
+                </thead><tbody>
+                <tr>
+                    <td>${task.id}</td>
+                    <td>${task.title}</td>
+                    <td>${task.description}</td>
+                    <td>${task.due_date || ''}</td>
+                    <td class="completed">${task.done ? '✓' : ''}</td>
+                </tr>
+                </tbody></table>`;
+
+            $('#searchResult').html(html);
+        },
+        error: function() {
+            $('#searchResult').html('<p>Task not found or error occurred.</p>');
         }
     });
 }
